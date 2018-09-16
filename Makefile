@@ -1,5 +1,5 @@
 CFLAGS ?=
-CFLAGS += -Wall -Wextra
+CFLAGS += -Wall -Wextra -g
 
 .PHONY: test
 test: table

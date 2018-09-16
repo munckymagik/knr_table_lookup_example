@@ -1,0 +1,2 @@
+CFLAGS ?=
+CFLAGS += -Wall -Wextra

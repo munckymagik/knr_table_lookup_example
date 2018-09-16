@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "test.h"
+#include "xalloc.h"
 
 #define HASH_SIZE 101
 
@@ -47,11 +48,11 @@ struct nlist *hash_insert(char *name, char *defn) {
     if ((np = hash_lookup(name)) == NULL) {
         // Not found. Add a new entry.
 
-        if ((np = malloc(sizeof(*np))) == NULL) {
+        if ((np = xmalloc(sizeof(*np))) == NULL) {
             goto error;
         }
 
-        if ((np->name = strdup(name)) == NULL) {
+        if ((np->name = xstrdup(name)) == NULL) {
             goto error;
         }
 
@@ -59,18 +60,18 @@ struct nlist *hash_insert(char *name, char *defn) {
         hash_table[hash_value] = np;
     } else {
         // Found. Free the value because we are going to overwrite it.
-        free(np->defn);
+        xfree_str(np->defn);
     }
 
-    if ((np->defn = strdup(defn)) == NULL) {
+    if ((np->defn = xstrdup(defn)) == NULL) {
         goto error;
     }
 
     return np;
 error:
     if (np) {
-        if (np->name) free(np->name);
-        free(np);
+        if (np->name) xfree_str(np->name);
+        xfree(np, sizeof(*np));
     }
     return NULL;
 }
@@ -132,6 +133,9 @@ int main() {
     });
 
     puts("OK.");
+
+    struct xalloc_stats stats = xalloc_get_stats();
+    printf("Leaked: %d bytes of total %d allocated\n", stats.count, stats.total);
 
     return 0;
 }

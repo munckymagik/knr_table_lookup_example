@@ -7,6 +7,8 @@ all: table
 
 .PHONY: clean
 clean:
-	rm -f table
+	rm -f table *.o
 
-table.c: test.h
+table: table.o xalloc.o
+table.c: xalloc.h test.h
+xalloc.c: xalloc.h

@@ -15,6 +15,23 @@ struct nlist {
 
 static struct nlist *hash_table[HASH_SIZE] = { 0 };
 
+void node_free(struct nlist *np) {
+    if (np) {
+        if (np->name) xfree_str(np->name);
+        if (np->defn) xfree_str(np->defn);
+        xfree(np, sizeof(*np));
+    }
+}
+
+void hash_free() {
+    for (size_t i = 0; i < HASH_SIZE; ++i) {
+        if (hash_table[i] == NULL) continue;
+
+        node_free(hash_table[i]);
+        hash_table[i] = NULL;
+    }
+}
+
 typedef uint32_t hash_value_t;
 
 hash_value_t hash_function(const char *s) {
@@ -69,10 +86,7 @@ struct nlist *hash_insert(char *name, char *defn) {
 
     return np;
 error:
-    if (np) {
-        if (np->name) xfree_str(np->name);
-        xfree(np, sizeof(*np));
-    }
+    node_free(np);
     return NULL;
 }
 
@@ -132,10 +146,13 @@ int main() {
         assert(strcmp(found->defn, "Z") == 0 && "found->defn was not Z");
     });
 
-    puts("OK.");
+    hash_free();
 
     struct xalloc_stats stats = xalloc_get_stats();
-    printf("Leaked: %d bytes of total %d allocated\n", stats.count, stats.total);
+    printf("\nLeaked: %d bytes of total %d allocated\n", stats.count, stats.total);
+    assert(stats.count == 0);
+
+    puts("\nOK.");
 
     return 0;
 }

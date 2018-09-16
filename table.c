@@ -8,14 +8,14 @@
 
 #define HASH_SIZE 101
 
-struct nlist {
+struct table_entry {
     char *name;
     char *defn;
 };
 
-static struct nlist *hash_table[HASH_SIZE] = { 0 };
+static struct table_entry *hash_table[HASH_SIZE] = { 0 };
 
-void node_free(struct nlist *np) {
+void table_entry_free(struct table_entry *np) {
     if (np) {
         if (np->name) xfree_str(np->name);
         if (np->defn) xfree_str(np->defn);
@@ -23,11 +23,11 @@ void node_free(struct nlist *np) {
     }
 }
 
-void hash_free() {
+void table_free() {
     for (size_t i = 0; i < HASH_SIZE; ++i) {
         if (hash_table[i] == NULL) continue;
 
-        node_free(hash_table[i]);
+        table_entry_free(hash_table[i]);
         hash_table[i] = NULL;
     }
 }
@@ -45,8 +45,8 @@ hash_value_t hash_function(const char *s) {
     return hash_value % HASH_SIZE;
 }
 
-struct nlist *hash_lookup(char *name) {
-    struct nlist *np = hash_table[hash_function(name)];
+struct table_entry *table_lookup(char *name) {
+    struct table_entry *np = hash_table[hash_function(name)];
 
     if (np == NULL) {
         return NULL;
@@ -59,10 +59,10 @@ struct nlist *hash_lookup(char *name) {
     return NULL;
 }
 
-struct nlist *hash_insert(char *name, char *defn) {
-    struct nlist *np = NULL;
+struct table_entry *table_insert(char *name, char *defn) {
+    struct table_entry *np = NULL;
 
-    if ((np = hash_lookup(name)) == NULL) {
+    if ((np = table_lookup(name)) == NULL) {
         // Not found. Add a new entry.
 
         if ((np = xmalloc(sizeof(*np))) == NULL) {
@@ -86,19 +86,19 @@ struct nlist *hash_insert(char *name, char *defn) {
 
     return np;
 error:
-    node_free(np);
+    table_entry_free(np);
     return NULL;
 }
 
 int main() {
     TEST("Add an entry then retrieve it", {
-        struct nlist *entry = hash_insert("X", "Y");
+        struct table_entry *entry = table_insert("X", "Y");
 
         assert(entry != NULL && "entry was NULL");
         assert(strcmp(entry->name, "X") == 0 && "entry->name was not X");
         assert(strcmp(entry->defn, "Y") == 0 && "entry->defn was not Y");
 
-        struct nlist *found = hash_lookup("X");
+        struct table_entry *found = table_lookup("X");
 
         assert(found != NULL && "found was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
@@ -106,15 +106,15 @@ int main() {
     });
 
     TEST("Overwrite the entry: ", {
-        hash_insert("X", "Y");
-        struct nlist *found = hash_lookup("X");
+        table_insert("X", "Y");
+        struct table_entry *found = table_lookup("X");
 
         assert(found != NULL && "found was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
         assert(strcmp(found->defn, "Y") == 0 && "found->defn was not Y");
 
-        hash_insert("X", "Z");
-        found = hash_lookup("X");
+        table_insert("X", "Z");
+        found = table_lookup("X");
 
         assert(found != NULL && "found was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
@@ -130,23 +130,23 @@ int main() {
     });
 
     TEST("Add more than one entry: ", {
-        struct nlist *found = NULL;
+        struct table_entry *found = NULL;
 
-        hash_insert("X", "Y");
-        hash_insert("Y", "Z");
+        table_insert("X", "Y");
+        table_insert("Y", "Z");
 
-        found = hash_lookup("X");
+        found = table_lookup("X");
         assert(found != NULL && "found for X was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
         assert(strcmp(found->defn, "Y") == 0 && "found->defn was not Y");
 
-        found = hash_lookup("Y");
+        found = table_lookup("Y");
         assert(found != NULL && "found for Y was NULL");
         assert(strcmp(found->name, "Y") == 0 && "found->name was not Y");
         assert(strcmp(found->defn, "Z") == 0 && "found->defn was not Z");
     });
 
-    hash_free();
+    table_free();
 
     struct xalloc_stats stats = xalloc_get_stats();
     printf("\nLeaked: %d bytes of total %d allocated\n", stats.count, stats.total);

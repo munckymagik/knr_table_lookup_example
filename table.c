@@ -1,8 +1,9 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "test.h"
 
 #define HASH_SIZE 1
 
@@ -62,8 +63,7 @@ error:
 }
 
 int main() {
-    // Add an entry then retrieve it
-    {
+    TEST("Add an entry then retrieve it", {
         struct nlist *entry = hash_insert("X", "Y");
 
         assert(entry != NULL && "entry was NULL");
@@ -75,10 +75,9 @@ int main() {
         assert(found != NULL && "found was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
         assert(strcmp(found->defn, "Y") == 0 && "found->defn was not Y");
-    }
+    });
 
-    // Overwrite the entry
-    {
+    TEST("Overwrite the entry: ", {
         hash_insert("X", "Y");
         struct nlist *found = hash_lookup("X");
 
@@ -92,7 +91,7 @@ int main() {
         assert(found != NULL && "found was NULL");
         assert(strcmp(found->name, "X") == 0 && "found->name was not X");
         assert(strcmp(found->defn, "Z") == 0 && "found->defn was not Z");
-    }
+    });
 
     puts("OK.");
 

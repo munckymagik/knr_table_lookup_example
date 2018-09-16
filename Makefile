@@ -1,9 +1,10 @@
 CFLAGS ?=
 CFLAGS += -Wall -Wextra
 
-
-.PHONY: all
-all: table
+.PHONY: test
+test: table
+	@echo
+	@./table
 
 .PHONY: clean
 clean:

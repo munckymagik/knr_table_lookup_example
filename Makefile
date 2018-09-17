@@ -1,4 +1,3 @@
-CFLAGS ?=
 CFLAGS += -Wall -Wextra -g
 
 .PHONY: test

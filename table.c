@@ -43,7 +43,7 @@ struct table_entry *table_entry_free(struct table_entry *np) {
     return prev;
 }
 
-void table_free() {
+void table_clear() {
     for (size_t i = 0; i < HASH_SIZE; ++i) {
         if (hash_table[i] == NULL) continue;
 

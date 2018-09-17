@@ -96,7 +96,7 @@ int main() {
         table_set_hash_function(old_hash_function);
     });
 
-    table_free();
+    table_clear();
 
     struct xalloc_stats stats = xalloc_get_stats();
     printf("\nLeaked: %d bytes of total %d allocated\n", stats.count, stats.total);

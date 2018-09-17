@@ -9,9 +9,9 @@ struct table_entry {
     char *defn;
 };
 
-void table_free();
 struct table_entry *table_lookup(char *name);
 struct table_entry *table_insert(char *name, char *defn);
+void table_clear();
 
 typedef uint32_t hash_value_t;
 typedef hash_value_t (*hash_function_t)(const char *s);

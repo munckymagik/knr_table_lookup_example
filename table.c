@@ -5,6 +5,10 @@
 #include "xalloc.h"
 
 #define HASH_SIZE 101
+
+/*
+ * This is the global singleton hash table.
+ */
 static struct table_entry *hash_table[HASH_SIZE] = { 0 };
 
 static hash_value_t default_hash_function(const char *s) {
@@ -30,17 +34,17 @@ hash_function_t table_set_hash_function(hash_function_t f) {
     return prev;
 }
 
-struct table_entry *table_entry_free(struct table_entry *np) {
-    struct table_entry *prev = NULL;
+struct table_entry *table_entry_free(struct table_entry *p_entry) {
+    struct table_entry *p_prev = NULL;
 
-    if (np) {
-        prev = np->prev;
-        if (np->name) xfree_str(np->name);
-        if (np->defn) xfree_str(np->defn);
-        xfree(np, sizeof(*np));
+    if (p_entry) {
+        p_prev = p_entry->prev;
+        if (p_entry->name) xfree_str(p_entry->name);
+        if (p_entry->defn) xfree_str(p_entry->defn);
+        xfree(p_entry, sizeof(*p_entry));
     }
 
-    return prev;
+    return p_prev;
 }
 
 void table_clear() {
@@ -57,45 +61,45 @@ void table_clear() {
 }
 
 struct table_entry *table_lookup(char *name) {
-    struct table_entry *np = hash_table[hash_function(name)];
+    struct table_entry *p_entry = hash_table[hash_function(name)];
 
-    for (; np != NULL; np = np->prev) {
-        if (strcmp(name, np->name) == 0) {
-            return np;
+    for (; p_entry != NULL; p_entry = p_entry->prev) {
+        if (strcmp(name, p_entry->name) == 0) {
+            return p_entry;
         }
     }
 
-    return np;
+    return p_entry;
 }
 
 struct table_entry *table_insert(char *name, char *defn) {
-    struct table_entry *np = NULL;
+    struct table_entry *p_entry = NULL;
 
-    if ((np = table_lookup(name)) == NULL) {
+    if ((p_entry = table_lookup(name)) == NULL) {
         // Not found. Add a new entry.
 
-        if ((np = xmalloc(sizeof(*np))) == NULL) {
+        if ((p_entry = xmalloc(sizeof(*p_entry))) == NULL) {
             goto error;
         }
 
-        if ((np->name = xstrdup(name)) == NULL) {
+        if ((p_entry->name = xstrdup(name)) == NULL) {
             goto error;
         }
 
         hash_value_t hash_value = hash_function(name);
-        np->prev = hash_table[hash_value];
-        hash_table[hash_value] = np;
+        p_entry->prev = hash_table[hash_value];
+        hash_table[hash_value] = p_entry;
     } else {
         // Found. Free the value because we are going to overwrite it.
-        xfree_str(np->defn);
+        xfree_str(p_entry->defn);
     }
 
-    if ((np->defn = xstrdup(defn)) == NULL) {
+    if ((p_entry->defn = xstrdup(defn)) == NULL) {
         goto error;
     }
 
-    return np;
+    return p_entry;
 error:
-    table_entry_free(np);
+    table_entry_free(p_entry);
     return NULL;
 }

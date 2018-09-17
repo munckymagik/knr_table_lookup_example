@@ -150,7 +150,7 @@ int main() {
 
     struct xalloc_stats stats = xalloc_get_stats();
     printf("\nLeaked: %d bytes of total %d allocated\n", stats.count, stats.total);
-    assert(stats.count == 0);
+    assert(stats.count == 0 && "memory leak detected");
 
     puts("\nOK.");
 

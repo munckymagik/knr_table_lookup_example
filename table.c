@@ -105,7 +105,7 @@ int main() {
         assert(strcmp(found->defn, "Y") == 0 && "found->defn was not Y");
     });
 
-    TEST("Overwrite the entry: ", {
+    TEST("Overwrite the entry", {
         table_insert("X", "Y");
         struct table_entry *found = table_lookup("X");
 
@@ -121,7 +121,7 @@ int main() {
         assert(strcmp(found->defn, "Z") == 0 && "found->defn was not Z");
     });
 
-    TEST("The hash function: ", {
+    TEST("The hash function", {
         assert(hash_function("") == 0 && "Hash isn't 0 for the empty string");
         assert(hash_function("\1") == 1 && "Hash isn't 1 for '\1'");
         assert(hash_function("\1\1") == 32 && "Hash isn't 32 for '\1\1'");
@@ -129,7 +129,7 @@ int main() {
         assert(hash_function("\1\1\1") == 84 && "Hash isn't deterministic for '\1\1\1'");
     });
 
-    TEST("Add more than one entry: ", {
+    TEST("Add more than one entry", {
         struct table_entry *found = NULL;
 
         table_insert("X", "Y");
